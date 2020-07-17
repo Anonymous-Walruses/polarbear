@@ -2,7 +2,7 @@ package gh
 
 import (
 	"context"
-	"log"
+	"time"
 
 	"github.com/google/go-github/github"
 )
@@ -51,4 +51,14 @@ func IsMLHFellow(username string, cli *github.Client, ctx context.Context) (bool
 		return filter(result)
 	}
 
+}
+
+func inTimeSpan(start, end, check time.Time) bool {
+	if start.Before(end) {
+		return !check.Before(start) && !check.After(end)
+	}
+	if start.Equal(end) {
+		return check.Equal(start)
+	}
+	return !start.After(check) || !end.Before(check)
 }

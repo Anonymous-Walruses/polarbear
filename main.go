@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/Anonymous-Walruses/polarbear/fb"
 	"github.com/Anonymous-Walruses/polarbear/gh"
@@ -35,6 +37,16 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	refDate := "01/02/2006"
+	start, err := time.Parse(refDate, "06/01/2020")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	end, err := time.Parse(refDate, "08/24/2020")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	// Then update all the users.
 	wg := &sync.WaitGroup{}
 	wg.Add(len(users))
@@ -49,6 +61,18 @@ func main() {
 				log.Printf("user %s is not a MLH Fellow, skipping\n", user)
 				return
 			}
+			n, err := gh.GetCommitCountInRange(user, start, end, githubClient)
+			if err != nil {
+				return
+			}
+			m, err := gh.GetPullRequestsInRange(user, start, end, githubClient)
+			if err != nil {
+				return
+			}
+
+			fmt.Println(user, "has", n, "commits")
+			fmt.Println(user, "has", m, "pull requests")
+
 		}(user, wg)
 
 	}
